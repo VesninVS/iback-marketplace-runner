@@ -1,0 +1,58 @@
+name: iBACK Marketplace Runner
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 07:40 and 19:40 Asia/Tomsk (UTC+7)
+    - cron: "40 0,12 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iback-marketplace-runner
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout private monitor repository
+        uses: actions/checkout@v4
+        with:
+          repository: VesninVS/iback-marketplace-monitor
+          token: ${{ secrets.MONITOR_REPO_TOKEN }}
+          path: private-monitor
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r private-monitor/requirements.txt
+
+      - name: Collect marketplace data (read-only)
+        env:
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
+          OZON_PERF_CLIENT_ID: ${{ secrets.OZON_PERF_CLIENT_ID }}
+          OZON_PERF_CLIENT_SECRET: ${{ secrets.OZON_PERF_CLIENT_SECRET }}
+          WB_API_TOKEN: ${{ secrets.WB_API_TOKEN }}
+        run: python private-monitor/monitor/collector.py
+
+      - name: Commit snapshot to private repository
+        working-directory: private-monitor
+        run: |
+          git config user.name "iBACK Monitor"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/latest.json data/history.jsonl
+          if git diff --cached --quiet; then
+            echo "No data changes"
+            exit 0
+          fi
+          git commit -m "monitor: marketplace snapshot"
+          git push
