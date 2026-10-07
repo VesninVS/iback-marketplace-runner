@@ -45,6 +45,7 @@ jobs:
         run: |
           python private-monitor/monitor/collector.py
           python private-monitor/monitor/returns_watch.py
+          python private-monitor/monitor/ozon_support_probe.py
 
       - name: Commit snapshot to private repository
         working-directory: private-monitor
