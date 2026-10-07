@@ -7,7 +7,7 @@ on:
     - cron: "40 8,10,12,14,16,18,20,22 * * *"
       timezone: "Asia/Tomsk"
     # Temporary scheduler verification run; remove after the first schedule event is confirmed.
-    - cron: "50 18 * * *"
+    - cron: "12 19 * * *"
       timezone: "Asia/Tomsk"
 
 permissions:
