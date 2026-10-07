@@ -46,7 +46,7 @@ jobs:
           python private-monitor/monitor/collector.py
           python private-monitor/monitor/returns_watch.py
           python private-monitor/monitor/experiment_monitor.py
-          python private-monitor/monitor/marked_sales_report.py
+          PYTHONPATH=private-monitor/monitor python private-monitor/marked_sales_report.py
           python private-monitor/monitor/timeline.py
 
       - name: Commit snapshot to private repository
